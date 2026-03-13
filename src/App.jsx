@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { MapPin, Search, Map as MapIcon, Navigation, Info, ChevronRight, X, ArrowLeft, Layers, ShieldCheck, LocateFixed, AlertCircle, Calendar, Clock, ChevronDown, ChevronUp, QrCode, Download, ChevronLeft, Users, FileText, Menu, Star, Home, Landmark, BookOpen, Briefcase } from 'lucide-react';
-
+import { SpeedInsights } from "@vercel/speed-insights/react"
 const defaultDetails = {
   trinh_do_hoc_van: ['Giáo dục phổ thông: 12/12 phổ thông', 'Chuyên môn, nghiệp vụ: Đại học – Chuyên ngành: Công nghiệp và công trình nông thôn', 'Lý luận chính trị: Trung cấp', 'Ngoại ngữ: Anh văn B'],
   tieu_su_tom_tat: ['Nơi đăng ký khai sinh: Phường Kon Tum, tỉnh Quảng Ngãi', 'Quê quán: Xã Tân Kỳ, thành phố Hải Phòng', 'Nơi đăng ký thường trú: Phường Kon Tum, tỉnh Quảng Ngãi', 'Nơi ở hiện nay: Phường Kon Tum, tỉnh Quảng Ngãi', 'Dân tộc: Kinh. Tôn giáo: Không', 'Nghề nghiệp hiện nay: Công chức', 'Tình trạng sức khoẻ: Tốt'],
@@ -58,6 +58,7 @@ const mockStations = [
 ];
 
 export default function App() {
+  
   const [activeStation, setActiveStation] = useState(null);
   const [detailedStation, setDetailedStation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -508,6 +509,7 @@ export default function App() {
           )}
         </div>
       )}
+    <SpeedInsights />
     </div>
   );
 }
