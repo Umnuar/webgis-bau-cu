@@ -236,6 +236,7 @@ export default function App() {
 
   return (
     <div className="h-screen bg-gray-50 flex flex-row font-sans overflow-hidden">
+      <SpeedInsights />
       <style>{`
         .leaflet-container { width: 100%; height: 100%; z-index: 1; }
         .hover-popup { transition: none !important; }
@@ -509,7 +510,6 @@ export default function App() {
           )}
         </div>
       )}
-    <SpeedInsights />
     </div>
   );
 }
