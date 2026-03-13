@@ -410,20 +410,22 @@ export default function App() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-2 md:p-8 animate-in fade-in duration-300">
           {viewMode === 'candidates' ? (
             <div className={`bg-gray-100 rounded-xl shadow-2xl w-full max-w-4xl h-full max-h-[95vh] flex flex-col overflow-hidden relative border border-white/20 ${isClosingList ? 'animate-modal-shrink' : 'animate-modal-pop'}`}>
-              <div className="bg-[#b81d1d] text-white p-5 flex items-center gap-4 relative shrink-0">
-                <div className="w-12 h-12 rounded-full border-2 border-yellow-400 bg-[#d92626] flex items-center justify-center shrink-0 shadow-sm">
-                  <Star fill="#facc15" className="text-yellow-400 w-6 h-6" />
+              <div className="bg-[#b81d1d] text-white p-4 sm:p-5 flex items-center gap-3 sm:gap-4 relative shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-yellow-400 bg-[#d92626] flex items-center justify-center shrink-0 shadow-sm">
+                  <Star fill="#facc15" className="text-yellow-400 w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-yellow-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
-                    <span className="w-8 h-[1px] bg-yellow-400"></span>
-                    {detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})
-                    <span className="w-8 h-[1px] bg-yellow-400"></span>
-                  </p>
-                  <h2 className="text-xl font-bold uppercase mb-0.5">Danh sách ứng cử viên</h2>
-                  <p className="text-sm text-yellow-200 font-medium">{stationCandidates.length} ứng cử viên</p>
+                <div className="flex-1 pr-12 min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                    <span className="w-4 sm:w-8 h-[1px] bg-yellow-400 shrink-0"></span>
+                    <p className="text-yellow-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">
+                      {detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})
+                    </p>
+                    <span className="w-4 sm:w-8 h-[1px] bg-yellow-400 shrink-0"></span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold uppercase mb-0.5 truncate">Danh sách ứng cử viên</h2>
+                  <p className="text-xs sm:text-sm text-yellow-200 font-medium">{stationCandidates.length} ứng cử viên</p>
                 </div>
-                <button onClick={closeCandidateList} className="absolute right-5 top-5 p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition">
+                <button onClick={closeCandidateList} className="absolute right-4 sm:right-5 top-4 sm:top-5 p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -544,16 +546,22 @@ export default function App() {
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-full max-h-[95vh] flex flex-col overflow-hidden relative border border-white/20 animate-in fade-in zoom-in-95 duration-300">
-              <div className="bg-[#b83332] text-white p-6 flex items-center gap-4 shrink-0 relative border-b-2 border-[#fbbf24]">
-                <div className={`w-14 h-14 bg-[#b83332] rounded-full border-2 border-[#fbbf24] flex items-center justify-center shrink-0 shadow-lg`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fbbf24" className="w-8 h-8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              <div className="bg-[#b83332] text-white p-4 sm:p-6 flex items-center gap-3 sm:gap-4 shrink-0 relative border-b-2 border-[#fbbf24]">
+                <div className={`w-10 h-10 sm:w-14 sm:h-14 bg-[#b83332] rounded-full border-2 border-[#fbbf24] flex items-center justify-center shrink-0 shadow-lg`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fbbf24" className="w-6 h-6 sm:w-8 sm:h-8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                 </div>
-                <div className="flex-1 space-y-0.5 overflow-hidden">
-                  <div className="flex items-center gap-2"><span className="w-4 h-[1px] bg-[#fbbf24] shrink-0"></span><p className="text-[#fbbf24] text-xs font-bold uppercase tracking-wider truncate">{detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})</p><span className="w-4 h-[1px] bg-[#fbbf24] shrink-0"></span></div>
-                  <h2 className="text-xl font-bold leading-tight uppercase tracking-tight truncate">{detailedStation.ten_diem}</h2>
-                  <p className="text-sm font-medium text-white/90 uppercase truncate">Tại {detailedStation.dia_chi_moi}</p>
+                <div className="flex-1 space-y-0.5 overflow-hidden min-w-0 pr-2 sm:pr-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="w-4 sm:w-8 h-[1px] bg-[#fbbf24] shrink-0"></span>
+                    <p className="text-[#fbbf24] text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">
+                      {detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})
+                    </p>
+                    <span className="w-4 sm:w-8 h-[1px] bg-[#fbbf24] shrink-0"></span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold leading-tight uppercase tracking-tight truncate">{detailedStation.ten_diem}</h2>
+                  <p className="text-xs sm:text-sm font-medium text-white/90 uppercase truncate">Tại {detailedStation.dia_chi_moi}</p>
                 </div>
-                <button onClick={handleCloseModal} className="p-1.5 bg-white/10 hover:bg-white/30 rounded-full transition ml-2"><X className="w-6 h-6" /></button>
+                <button onClick={handleCloseModal} className="p-1.5 bg-white/10 hover:bg-white/30 rounded-full transition shrink-0"><X className="w-5 h-5 sm:w-6 sm:h-6" /></button>
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar bg-gray-50 pb-20">
                 <div className="flex flex-col">
