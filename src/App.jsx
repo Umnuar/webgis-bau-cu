@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { MapPin, Search, Map as MapIcon, Navigation, Info, ChevronRight, X, ArrowLeft, Layers, ShieldCheck, LocateFixed, AlertCircle, Calendar, Clock, ChevronDown, ChevronUp, QrCode, Download, ChevronLeft, Users, FileText, Menu, Star, Home, Landmark, BookOpen, Briefcase } from 'lucide-react';
-import { SpeedInsights } from "@vercel/speed-insights/react"
+
 const defaultDetails = {
   trinh_do_hoc_van: ['Giáo dục phổ thông: 12/12 phổ thông', 'Chuyên môn, nghiệp vụ: Đại học – Chuyên ngành: Công nghiệp và công trình nông thôn', 'Lý luận chính trị: Trung cấp', 'Ngoại ngữ: Anh văn B'],
   tieu_su_tom_tat: ['Nơi đăng ký khai sinh: Phường Kon Tum, tỉnh Quảng Ngãi', 'Quê quán: Xã Tân Kỳ, thành phố Hải Phòng', 'Nơi đăng ký thường trú: Phường Kon Tum, tỉnh Quảng Ngãi', 'Nơi ở hiện nay: Phường Kon Tum, tỉnh Quảng Ngãi', 'Dân tộc: Kinh. Tôn giáo: Không', 'Nghề nghiệp hiện nay: Công chức', 'Tình trạng sức khoẻ: Tốt'],
@@ -58,7 +58,6 @@ const mockStations = [
 ];
 
 export default function App() {
-  
   const [activeStation, setActiveStation] = useState(null);
   const [detailedStation, setDetailedStation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,6 +72,7 @@ export default function App() {
   const [isClosingList, setIsClosingList] = useState(false);
   
   const qrRef = useRef(null);
+  const userMarkerRef = useRef(null);
 
   useEffect(() => {
     if (!document.getElementById('leaflet-css')) {
@@ -158,11 +158,58 @@ export default function App() {
     }, 250);
   };
 
+  const handleLocateMe = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          if (mapInstance.current) {
+            mapInstance.current.flyTo([latitude, longitude], 15, { duration: 1.5 });
+            
+            if (userMarkerRef.current) {
+              userMarkerRef.current.remove();
+            }
+            
+            const userIcon = window.L.divIcon({
+              html: '<div style="width: 16px; height: 16px; background: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 8px rgba(0,0,0,0.4);"></div>',
+              className: '',
+              iconSize: [16, 16],
+              iconAnchor: [8, 8]
+            });
+            
+            userMarkerRef.current = window.L.marker([latitude, longitude], { icon: userIcon }).addTo(mapInstance.current);
+          }
+        },
+        (error) => console.error(error),
+        { enableHighAccuracy: true }
+      );
+    }
+  };
+
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
+  const markersDict = useRef({});
   const tileLayerRef = useRef(null);
   const [isSatellite, setIsSatellite] = useState(true);
+
+  const handleFocusStation = (station) => {
+    setActiveStation(station);
+    if (mapInstance.current) {
+      const map = mapInstance.current;
+      const currentZoom = map.getZoom();
+      
+      if (currentZoom >= 16) {
+        map.panTo([station.lat, station.lng], { animate: true, duration: 0.5 });
+      } else {
+        map.flyTo([station.lat, station.lng], 16, { duration: 1 });
+      }
+    }
+    
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (!leafletLoaded || !window.L || !mapRef.current) return;
@@ -172,6 +219,8 @@ export default function App() {
     const map = mapInstance.current;
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
+    markersDict.current = {};
+
     filteredStations.forEach(station => {
       const markerHtml = `
         <div style="display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.3));">
@@ -211,14 +260,16 @@ export default function App() {
       `;
       marker.bindPopup(popupContent, { className: 'hover-popup', maxWidth: 450, offset: [0, -4] });
       let closeTimeout; let animTimeout;
-      const cancelClose = (m) => { clearTimeout(closeTimeout); clearTimeout(animTimeout); if (m.isPopupOpen()) { const popupNode = m.getPopup()._container; if (popupNode && popupNode.classList.contains('closing')) { popupNode.classList.remove('closing'); if (m._icon) { const thumb = m._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '0'; thumb.style.transform = 'scale(0.8)'; thumb.style.pointerEvents = 'none'; } } } } };
-      const closeWithAnimation = (m) => { if (!m.isPopupOpen()) return; const popupNode = m.getPopup()._container; if (popupNode) { if (popupNode.classList.contains('closing')) return; popupNode.classList.add('closing'); if (m._icon) { const thumb = m._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '1'; thumb.style.transform = 'scale(1)'; thumb.style.pointerEvents = 'auto'; } } animTimeout = setTimeout(() => { m.closePopup(); }, 230); } };
+      const cancelClose = (m) => { clearTimeout(closeTimeout); clearTimeout(animTimeout); if (m.isPopupOpen()) { const popupNode = m.getPopup()._container; if (popupNode && popupNode.classList.contains('closing')) { popupNode.classList.remove('closing'); if (m._icon) { const thumb = m._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '0'; thumb.style.transform = 'scale(0.8)'; thumb.style.pointerEvents = 'none'; thumb.classList.add('hidden-thumbnail'); } } } } };
+      const closeWithAnimation = (m) => { if (!m.isPopupOpen()) return; const popupNode = m.getPopup()._container; if (popupNode) { if (popupNode.classList.contains('closing')) return; popupNode.classList.add('closing'); if (m._icon) { const thumb = m._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '1'; thumb.style.transform = 'scale(1)'; thumb.style.pointerEvents = 'auto'; thumb.classList.remove('hidden-thumbnail'); } } animTimeout = setTimeout(() => { m.closePopup(); }, 230); } };
       marker.on('mouseover', function(e) { cancelClose(this); this.openPopup(); });
       marker.on('mouseout', function(e) { closeTimeout = setTimeout(() => closeWithAnimation(this), 100); });
-      marker.on('popupopen', function() { const popupNode = this.getPopup()._container; if (popupNode) { popupNode.classList.remove('closing'); popupNode.onmouseenter = () => cancelClose(this); popupNode.onmouseleave = () => { closeTimeout = setTimeout(() => closeWithAnimation(this), 100); }; } if (this._icon) { const thumb = this._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '0'; thumb.style.transform = 'scale(0.8)'; thumb.style.pointerEvents = 'none'; } } });
-      marker.on('popupclose', function() { clearTimeout(closeTimeout); clearTimeout(animTimeout); if (this._icon) { const thumb = this._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '1'; thumb.style.transform = 'scale(1)'; thumb.style.pointerEvents = 'auto'; } } });
-      marker.on('click', function() { setActiveStation(station); });
+      marker.on('popupopen', function() { const popupNode = this.getPopup()._container; if (popupNode) { popupNode.classList.remove('closing'); popupNode.onmouseenter = () => cancelClose(this); popupNode.onmouseleave = () => { closeTimeout = setTimeout(() => closeWithAnimation(this), 100); }; } if (this._icon) { const thumb = this._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '0'; thumb.style.transform = 'scale(0.8)'; thumb.style.pointerEvents = 'none'; thumb.classList.add('hidden-thumbnail'); } } });
+      marker.on('popupclose', function() { clearTimeout(closeTimeout); clearTimeout(animTimeout); if (this._icon) { const thumb = this._icon.querySelector('.marker-thumbnail'); if (thumb) { thumb.style.opacity = '1'; thumb.style.transform = 'scale(1)'; thumb.style.pointerEvents = 'auto'; thumb.classList.remove('hidden-thumbnail'); } } });
+      marker.on('click', function() { handleFocusStation(station); });
+      
       markersRef.current.push(marker);
+      markersDict.current[station.id] = marker;
     });
   }, [filteredStations, leafletLoaded]);
 
@@ -234,9 +285,16 @@ export default function App() {
   const stationCandidates = detailedStation ? mockCandidates.filter(c => c.don_vi_bau_cu.toLowerCase() === detailedStation.don_vi_bau_cu.toLowerCase()) : [];
   const filteredCandidatesByTab = stationCandidates.filter(c => c.cap === candidateTab);
 
+  const handleCloseModal = () => {
+    setDetailedStation(null);
+    setShowQR(false);
+    if (mapInstance.current) {
+      mapInstance.current.closePopup();
+    }
+  };
+
   return (
     <div className="h-screen bg-gray-50 flex flex-row font-sans overflow-hidden">
-      <SpeedInsights />
       <style>{`
         .leaflet-container { width: 100%; height: 100%; z-index: 1; }
         .hover-popup { transition: none !important; }
@@ -259,6 +317,7 @@ export default function App() {
         @keyframes shrinkOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
         
         .details-grid { display: grid; transition: grid-template-rows 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out; }
+        .hidden-thumbnail { opacity: 0 !important; transform: scale(0.8) !important; pointer-events: none !important; }
       `}</style>
       
       <div className={`fixed top-0 left-0 md:relative w-full md:w-[400px] bg-[#f0ece9] flex flex-col h-[100dvh] md:h-screen shadow-2xl z-[1000] border-r border-gray-300 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:-ml-[400px]'}`}>
@@ -277,8 +336,8 @@ export default function App() {
               <input type="text" placeholder="Tìm kiếm nhanh..." className="w-full p-2.5 pl-9 rounded-xl border border-gray-300 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 text-sm bg-white shadow-sm transition" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               <Search className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
             </div>
-            <button className="bg-[#b83332] text-white px-3 py-2 rounded-xl font-bold text-[13px] flex items-center gap-1.5 hover:bg-[#991b1b] transition shadow-md whitespace-nowrap">
-              <MapPin className="w-4 h-4" /> Vị trí của tôi
+            <button onClick={handleLocateMe} className="bg-[#b83332] text-white px-3 py-2 rounded-xl font-bold text-[13px] flex items-center gap-1.5 hover:bg-[#991b1b] transition shadow-md whitespace-nowrap">
+              <LocateFixed className="w-4 h-4" /> Vị trí của tôi
             </button>
           </div>
           <div className="flex gap-2">
@@ -295,7 +354,7 @@ export default function App() {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
           {filteredStations.length > 0 ? filteredStations.map(station => (
-            <div key={station.id} className="group bg-white rounded-xl shadow-sm border border-gray-200 mb-4 flex h-[150px] hover:shadow-md hover:border-red-200 transition-all cursor-pointer overflow-hidden" onClick={() => setActiveStation(station)}>
+            <div key={station.id} className="group bg-white rounded-xl shadow-sm border border-gray-200 mb-4 flex h-[150px] hover:shadow-md hover:border-red-200 transition-all cursor-pointer overflow-hidden" onClick={() => handleFocusStation(station)}>
               <div className="w-[130px] shrink-0 bg-gray-100 relative overflow-hidden">
                 <img src={station.hinh_anh} alt={station.ten_diem} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
@@ -312,7 +371,7 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={(e) => { e.stopPropagation(); setDetailedStation(station); setViewMode('detail'); setShowQR(false); }} className="flex-1 bg-[#b83332] text-white py-1.5 rounded-full font-semibold text-[13px] flex items-center justify-center transition hover:bg-[#991b1b]">Xem chi tiết</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleFocusStation(station); setDetailedStation(station); setViewMode('detail'); setShowQR(false); }} className="flex-1 bg-[#b83332] text-white py-1.5 rounded-full font-semibold text-[13px] flex items-center justify-center transition hover:bg-[#991b1b]">Xem chi tiết</button>
                   <button onClick={(e) => { e.stopPropagation(); getDirections(station.lat, station.lng); }} className="flex-1 bg-[#f5e6e6] text-[#b83332] py-1.5 rounded-full font-semibold text-[13px] flex items-center justify-center gap-1 transition hover:bg-[#ebd5d5] border border-red-100"><Navigation className="w-3.5 h-3.5"/> Chỉ đường</button>
                 </div>
               </div>
@@ -489,7 +548,7 @@ export default function App() {
                   <h2 className="text-xl font-bold leading-tight uppercase tracking-tight truncate">{detailedStation.ten_diem}</h2>
                   <p className="text-sm font-medium text-white/90 uppercase truncate">Tại {detailedStation.dia_chi_moi}</p>
                 </div>
-                <button onClick={() => { setDetailedStation(null); setShowQR(false); }} className="p-1.5 bg-white/10 hover:bg-white/30 rounded-full transition ml-2"><X className="w-6 h-6" /></button>
+                <button onClick={handleCloseModal} className="p-1.5 bg-white/10 hover:bg-white/30 rounded-full transition ml-2"><X className="w-6 h-6" /></button>
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar bg-gray-50 pb-20">
                 <div className="flex flex-col">
@@ -505,7 +564,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-4 md:px-8 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20"><button onClick={() => { setDetailedStation(null); setShowQR(false); }} className="flex-1 py-3 bg-white border-2 border-[#b83332] text-[#b83332] rounded-xl font-bold hover:bg-red-50 transition flex items-center justify-center gap-2 uppercase tracking-wide"><X className="w-5 h-5" /> Đóng</button><button onClick={() => getDirections(detailedStation.lat, detailedStation.lng)} className="flex-1 py-3 bg-[#b83332] text-white rounded-xl font-bold hover:bg-[#991b1b] transition flex items-center justify-center gap-2 shadow-lg shadow-red-200 uppercase tracking-wide"><Navigation className="w-5 h-5" /> Chỉ đường</button></div>
+              <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-4 md:px-8 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20"><button onClick={handleCloseModal} className="flex-1 py-3 bg-white border-2 border-[#b83332] text-[#b83332] rounded-xl font-bold hover:bg-red-50 transition flex items-center justify-center gap-2 uppercase tracking-wide"><X className="w-5 h-5" /> Đóng</button><button onClick={() => getDirections(detailedStation.lat, detailedStation.lng)} className="flex-1 py-3 bg-[#b83332] text-white rounded-xl font-bold hover:bg-[#991b1b] transition flex items-center justify-center gap-2 shadow-lg shadow-red-200 uppercase tracking-wide"><Navigation className="w-5 h-5" /> Chỉ đường</button></div>
             </div>
           )}
         </div>
