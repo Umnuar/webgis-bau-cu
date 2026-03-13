@@ -26,8 +26,8 @@ const mockStations = [
     phuong_xa_cu: 'Phường Quang Trung cũ',
     don_vi_bau_cu: 'Đơn vị bầu cử số 1', 
     dia_chi_moi: 'Trường Tiểu học Lê Hồng Phong (số 115 Lê Hồng Phong)',
-    lat: 21.0368, 
-    lng: 105.7958, 
+    lat: 14.3505, 
+    lng: 108.0001, 
     so_cu_tri: 1200, 
     hinh_anh: 'https://images.unsplash.com/photo-1577493340887-b7bfff550145?w=1200&q=80' 
   },
@@ -38,8 +38,8 @@ const mockStations = [
     phuong_xa_cu: 'Phường Quang Trung cũ',
     don_vi_bau_cu: 'Đơn vị bầu cử số 1', 
     dia_chi_moi: 'Hội trường Tổ dân phố 3 (Số 304 Xuân Thủy)',
-    lat: 21.0381, 
-    lng: 105.7892, 
+    lat: 14.3552, 
+    lng: 107.9950, 
     so_cu_tri: 950, 
     hinh_anh: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80' 
   },
@@ -50,8 +50,8 @@ const mockStations = [
     phuong_xa_cu: 'Phường Bách Khoa cũ',
     don_vi_bau_cu: 'Đơn vị bầu cử số 2', 
     dia_chi_moi: 'Sân vận động Bách Khoa (Số 1 Đại Cồ Việt)',
-    lat: 21.0069, 
-    lng: 105.8431, 
+    lat: 14.3468, 
+    lng: 108.0055, 
     so_cu_tri: 1500, 
     hinh_anh: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80' 
   }
@@ -214,7 +214,7 @@ export default function App() {
   useEffect(() => {
     if (!leafletLoaded || !window.L || !mapRef.current) return;
     if (!mapInstance.current) {
-      mapInstance.current = window.L.map(mapRef.current, { zoomControl: false }).setView([21.0285, 105.8542], 12);
+      mapInstance.current = window.L.map(mapRef.current, { zoomControl: false }).setView([14.3497, 108.0000], 14);
     }
     const map = mapInstance.current;
     markersRef.current.forEach(m => m.remove());
