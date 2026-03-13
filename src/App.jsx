@@ -179,9 +179,14 @@ export default function App() {
             
             userMarkerRef.current = window.L.marker([latitude, longitude], { icon: userIcon }).addTo(mapInstance.current);
           }
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            setIsSidebarOpen(false);
+          }
         },
-        (error) => console.error(error),
-        { enableHighAccuracy: true }
+        (error) => {
+          console.error("Lỗi lấy vị trí: ", error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
   };
