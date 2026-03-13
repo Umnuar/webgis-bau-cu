@@ -1,10 +1,21 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { MapPin, Search, Map as MapIcon, Navigation, Info, ChevronRight, X, ArrowLeft, Layers, ShieldCheck, LocateFixed, AlertCircle, Calendar, Clock, ChevronDown, ChevronUp, QrCode, Download, ChevronLeft, Users, FileText, Menu } from 'lucide-react';
+import { MapPin, Search, Map as MapIcon, Navigation, Info, ChevronRight, X, ArrowLeft, Layers, ShieldCheck, LocateFixed, AlertCircle, Calendar, Clock, ChevronDown, ChevronUp, QrCode, Download, ChevronLeft, Users, FileText, Menu, Star, Home, Landmark, BookOpen, Briefcase } from 'lucide-react';
+
+const defaultDetails = {
+  trinh_do_hoc_van: ['Giáo dục phổ thông: 12/12 phổ thông', 'Chuyên môn, nghiệp vụ: Đại học – Chuyên ngành: Công nghiệp và công trình nông thôn', 'Lý luận chính trị: Trung cấp', 'Ngoại ngữ: Anh văn B'],
+  tieu_su_tom_tat: ['Nơi đăng ký khai sinh: Phường Kon Tum, tỉnh Quảng Ngãi', 'Quê quán: Xã Tân Kỳ, thành phố Hải Phòng', 'Nơi đăng ký thường trú: Phường Kon Tum, tỉnh Quảng Ngãi', 'Nơi ở hiện nay: Phường Kon Tum, tỉnh Quảng Ngãi', 'Dân tộc: Kinh. Tôn giáo: Không', 'Nghề nghiệp hiện nay: Công chức', 'Tình trạng sức khoẻ: Tốt'],
+  qua_trinh_cong_tac: [
+    { thoi_gian: 'Từ tháng 3 năm 2007 đến tháng 4 năm 2008', cong_viec: 'Chuyên viên phòng Dân tộc thị xã Kon Tum, tỉnh Kon Tum' },
+    { thoi_gian: 'Từ tháng 4 năm 2008 đến tháng 5 năm 2020', cong_viec: 'Chuyên viên Văn phòng HĐND-UBND thành phố Kon Tum, tỉnh Kon Tum' },
+    { thoi_gian: 'Từ tháng 5 năm 2020 đến nay', cong_viec: 'Phó Chánh Văn phòng Đảng ủy phường Kon Tum' }
+  ]
+};
 
 const mockCandidates = [
-  { id: 'C1', ten: 'Nguyễn Văn A', nam_sinh: 1975, anh: 'https://i.pravatar.cc/150?u=C1', que_quan: 'Hà Nội', trinh_do: 'Thạc sĩ Kinh tế', nghe_nghiep: 'Công chức', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 1', tieu_su: 'Đã có nhiều đóng góp trong công tác quản lý kinh tế địa phương.' },
-  { id: 'C2', ten: 'Trần Thị B', nam_sinh: 1982, anh: 'https://i.pravatar.cc/150?u=C2', que_quan: 'Hải Phòng', trinh_do: 'Tiến sĩ Luật', nghe_nghiep: 'Giảng viên', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 1', tieu_su: 'Chuyên gia tư vấn luật pháp, tham gia nhiều dự án cộng đồng.' },
-  { id: 'C3', ten: 'Lê Văn C', nam_sinh: 1968, anh: 'https://i.pravatar.cc/150?u=C3', que_quan: 'Đà Nẵng', trinh_do: 'Cử nhân Chính trị', nghe_nghiep: 'Cán bộ hưu trí', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 2', tieu_su: 'Nguyên lãnh đạo cấp cơ sở, giàu kinh nghiệm thực tiễn.' }
+  { id: 'C1', ten: 'Bà Phí Thị Thúy Hà', nam_sinh: '03/09/1981', anh: 'https://i.pravatar.cc/150?u=C1', que_quan: 'Xã Xuân Vân - Tỉnh Tuyên Quang', trinh_do: 'Thạc sĩ Kinh tế', nghe_nghiep: 'Chuyên viên', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 1', tieu_su: 'Đã có nhiều đóng góp trong công tác quản lý kinh tế địa phương.', cap: 'xa', ...defaultDetails },
+  { id: 'C2', ten: 'Bà Lê Thị Hạnh', nam_sinh: '01/09/1984', anh: 'https://i.pravatar.cc/150?u=C2', que_quan: 'Xã Lĩnh Thoại, tỉnh Thanh Hoá', trinh_do: 'Tiến sĩ Luật', nghe_nghiep: 'Tổng giám đốc', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 1', tieu_su: 'Chuyên gia tư vấn luật pháp, tham gia nhiều dự án cộng đồng.', cap: 'xa', ...defaultDetails },
+  { id: 'C3', ten: 'Ông Nguyễn Văn C', nam_sinh: '15/05/1975', anh: 'https://i.pravatar.cc/150?u=C3', que_quan: 'Thành phố Kon Tum', trinh_do: 'Cử nhân Chính trị', nghe_nghiep: 'Chủ tịch HĐND', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 2', tieu_su: 'Nguyên lãnh đạo cấp cơ sở, giàu kinh nghiệm thực tiễn.', cap: 'tinh', ...defaultDetails },
+  { id: 'C4', ten: 'Bà Trần Thị D', nam_sinh: '20/11/1980', anh: 'https://i.pravatar.cc/150?u=C4', que_quan: 'Đà Nẵng', trinh_do: 'Thạc sĩ Quản lý công', nghe_nghiep: 'Đại biểu Quốc hội', don_vi_bau_cu: 'ĐƠN VỊ BẦU CỬ SỐ 1', tieu_su: 'Nhiều năm kinh nghiệm trong công tác xây dựng luật.', cap: 'quoc_hoi', ...defaultDetails }
 ];
 
 const mockStations = [
@@ -52,11 +63,13 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWard, setSelectedWard] = useState('all');
   const [selectedUnit, setSelectedUnit] = useState('all');
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [expandedCandidateId, setExpandedCandidateId] = useState(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [viewMode, setViewMode] = useState('detail'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
+  const [candidateTab, setCandidateTab] = useState('xa');
+  const [isClosingList, setIsClosingList] = useState(false);
   
   const qrRef = useRef(null);
 
@@ -128,6 +141,21 @@ export default function App() {
       }
     };
   }, []);
+
+  const openCandidateList = () => {
+    setIsClosingList(false);
+    setViewMode('candidates');
+    setExpandedCandidateId(null);
+  };
+
+  const closeCandidateList = () => {
+    setIsClosingList(true);
+    setTimeout(() => {
+      setViewMode('detail');
+      setIsClosingList(false);
+      setExpandedCandidateId(null);
+    }, 250);
+  };
 
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -203,6 +231,7 @@ export default function App() {
   }, [isSatellite, leafletLoaded, isSidebarOpen]);
 
   const stationCandidates = detailedStation ? mockCandidates.filter(c => c.don_vi_bau_cu.toLowerCase() === detailedStation.don_vi_bau_cu.toLowerCase()) : [];
+  const filteredCandidatesByTab = stationCandidates.filter(c => c.cap === candidateTab);
 
   return (
     <div className="h-screen bg-gray-50 flex flex-row font-sans overflow-hidden">
@@ -221,6 +250,13 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 10px; }
         .custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: #9ca3af; }
+        
+        .animate-modal-pop { animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .animate-modal-shrink { animation: shrinkOut 0.25s ease-in forwards; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shrinkOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
+        
+        .details-grid { display: grid; transition: grid-template-rows 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out; }
       `}</style>
       
       <div className={`fixed top-0 left-0 md:relative w-full md:w-[400px] bg-[#f0ece9] flex flex-col h-[100dvh] md:h-screen shadow-2xl z-[1000] border-r border-gray-300 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:-ml-[400px]'}`}>
@@ -306,33 +342,158 @@ export default function App() {
 
       {detailedStation && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-2 md:p-8 animate-in fade-in duration-300">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-full max-h-[95vh] flex flex-col overflow-hidden relative border border-white/20">
-            <div className="bg-[#b83332] text-white p-6 flex items-center gap-4 shrink-0 relative border-b-2 border-[#fbbf24]">
-              {(viewMode === 'candidates' || selectedCandidate) && (
-                <button onClick={() => { if (selectedCandidate) setSelectedCandidate(null); else setViewMode('detail'); }} className="mr-2 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition flex items-center gap-2 group border border-white/20">
-                  <ArrowLeft className="w-5 h-5 text-[#fbbf24]" /><span className="text-sm font-bold text-[#fbbf24] hidden md:inline">QUAY LẠI</span>
+          {viewMode === 'candidates' ? (
+            <div className={`bg-gray-100 rounded-xl shadow-2xl w-full max-w-4xl h-full max-h-[95vh] flex flex-col overflow-hidden relative border border-white/20 ${isClosingList ? 'animate-modal-shrink' : 'animate-modal-pop'}`}>
+              <div className="bg-[#b81d1d] text-white p-5 flex items-center gap-4 relative shrink-0">
+                <div className="w-12 h-12 rounded-full border-2 border-yellow-400 bg-[#d92626] flex items-center justify-center shrink-0 shadow-sm">
+                  <Star fill="#facc15" className="text-yellow-400 w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-yellow-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
+                    <span className="w-8 h-[1px] bg-yellow-400"></span>
+                    {detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})
+                    <span className="w-8 h-[1px] bg-yellow-400"></span>
+                  </p>
+                  <h2 className="text-xl font-bold uppercase mb-0.5">Danh sách ứng cử viên</h2>
+                  <p className="text-sm text-yellow-200 font-medium">{stationCandidates.length} ứng cử viên</p>
+                </div>
+                <button onClick={closeCandidateList} className="absolute right-5 top-5 p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition">
+                  <X className="w-5 h-5" />
                 </button>
-              )}
-              <div className={`w-14 h-14 bg-[#b83332] rounded-full border-2 border-[#fbbf24] flex items-center justify-center shrink-0 shadow-lg ${(viewMode === 'candidates' || selectedCandidate) ? 'hidden sm:flex' : 'flex'}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fbbf24" className="w-8 h-8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
               </div>
-              <div className="flex-1 space-y-0.5 overflow-hidden">
-                <div className="flex items-center gap-2"><span className="w-4 h-[1px] bg-[#fbbf24] shrink-0"></span><p className="text-[#fbbf24] text-xs font-bold uppercase tracking-wider truncate">{detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})</p><span className="w-4 h-[1px] bg-[#fbbf24] shrink-0"></span></div>
-                <h2 className="text-xl font-bold leading-tight uppercase tracking-tight truncate">{selectedCandidate ? selectedCandidate.ten : viewMode === 'candidates' ? 'DANH SÁCH ỨNG CỬ VIÊN' : detailedStation.ten_diem}</h2>
-                {viewMode === 'candidates' && !selectedCandidate ? <p className="text-sm font-bold text-[#fbbf24] uppercase tracking-wide">{stationCandidates.length} ứng cử viên</p> : !selectedCandidate && <p className="text-sm font-medium text-white/90 uppercase truncate">Tại {detailedStation.dia_chi_moi}</p>}
+
+              <div className="flex bg-white border-b border-gray-200 shadow-sm shrink-0">
+                <button onClick={() => setCandidateTab('xa')} className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${candidateTab === 'xa' ? 'text-[#b81d1d] border-b-2 border-[#b81d1d]' : 'text-gray-500 hover:text-gray-700'}`}>
+                  <Home className="w-4 h-4" /> Cấp xã
+                </button>
+                <button onClick={() => setCandidateTab('tinh')} className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${candidateTab === 'tinh' ? 'text-[#b81d1d] border-b-2 border-[#b81d1d]' : 'text-gray-500 hover:text-gray-700'}`}>
+                  <MapIcon className="w-4 h-4" /> Cấp tỉnh
+                </button>
+                <button onClick={() => setCandidateTab('quoc_hoi')} className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${candidateTab === 'quoc_hoi' ? 'text-[#b81d1d] border-b-2 border-[#b81d1d]' : 'text-gray-500 hover:text-gray-700'}`}>
+                  <Landmark className="w-4 h-4" /> Quốc hội
+                </button>
               </div>
-              <button onClick={() => { setDetailedStation(null); setSelectedCandidate(null); setViewMode('detail'); setShowQR(false); }} className="p-1.5 bg-white/10 hover:bg-white/30 rounded-full transition ml-2"><X className="w-6 h-6" /></button>
+
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar">
+                {filteredCandidatesByTab.length > 0 ? filteredCandidatesByTab.map(c => (
+                  <div key={c.id} className="bg-gradient-to-r from-[#ffeaa7] to-[#ffdcb3] rounded-xl p-4 md:p-5 shadow-sm border border-[#fce49c] overflow-hidden">
+                    
+                    {/* Header Card Area */}
+                    <div className="relative flex flex-col md:flex-row md:items-center gap-4">
+                      <div className="absolute -top-5 -left-5 w-16 h-16 bg-[#d92626]" style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}>
+                        <Star fill="#facc15" className="text-yellow-400 w-4 h-4 absolute top-2 left-2" />
+                      </div>
+                      
+                      <div className="flex items-center gap-4 relative z-10 w-full md:w-auto">
+                        <div className="bg-white p-1 rounded-full border-2 border-[#d92626] shrink-0 ml-4 md:ml-2">
+                          <img src={c.anh} className="w-16 h-16 rounded-full object-cover" alt={c.ten} />
+                        </div>
+                        <div className="flex-1 md:hidden">
+                          <h4 className="text-[#b81d1d] font-bold text-lg uppercase leading-tight">{c.ten}</h4>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 relative z-10 pl-2 md:pl-0">
+                        <h4 className="text-[#b81d1d] font-bold text-lg uppercase mb-1 hidden md:block">{c.ten}</h4>
+                        <p className="text-[14px] text-gray-800 mb-0.5"><span className="font-medium">Ngày sinh:</span> {c.nam_sinh}</p>
+                        <p className="text-[14px] text-gray-800 mb-0.5 truncate"><span className="font-medium">Quê quán:</span> {c.que_quan}</p>
+                        <p className="text-[14px] text-gray-800 truncate"><span className="font-medium">Chức vụ:</span> {c.nghe_nghiep}</p>
+                      </div>
+
+                      <div className="relative z-10 flex justify-end shrink-0 pt-2 md:pt-0">
+                        <button 
+                          onClick={() => setExpandedCandidateId(expandedCandidateId === c.id ? null : c.id)} 
+                          className="bg-[#8b1616] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#6b1111] transition flex items-center gap-1.5 shadow-md"
+                        >
+                          {expandedCandidateId === c.id ? 'Đóng chi tiết' : 'Xem chi tiết'} 
+                          {expandedCandidateId === c.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Expandable Content Area using CSS Grid Trick */}
+                    <div className={`details-grid ${expandedCandidateId === c.id ? 'grid-rows-[1fr] opacity-100 mt-5' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                      <div className="overflow-hidden">
+                        
+                        {/* Box 1: Trình độ học vấn */}
+                        <div className="mb-4 rounded-xl overflow-hidden border border-[#d92626]/20 bg-[#fff9e6] shadow-sm">
+                          <div className="bg-[#b81d1d] text-white p-2.5 px-4 font-bold text-[13px] flex items-center gap-2">
+                            <BookOpen className="w-4 h-4" /> TRÌNH ĐỘ HỌC VẤN
+                          </div>
+                          <div className="p-3.5 text-[13px] text-gray-800">
+                            <ul className="list-disc pl-5 space-y-1.5">
+                              {c.trinh_do_hoc_van.map((item, i) => <li key={i}>{item}</li>)}
+                            </ul>
+                          </div>
+                        </div>
+
+                        {/* Box 2: Tiểu sử tóm tắt */}
+                        <div className="mb-4 rounded-xl overflow-hidden border border-[#d92626]/20 bg-[#fff9e6] shadow-sm">
+                          <div className="bg-[#b81d1d] text-white p-2.5 px-4 font-bold text-[13px] flex items-center gap-2">
+                            <FileText className="w-4 h-4" /> TIỂU SỬ TÓM TẮT
+                          </div>
+                          <div className="p-3.5 text-[13px] text-gray-800">
+                            <ul className="list-disc pl-5 space-y-1.5">
+                              {c.tieu_su_tom_tat.map((item, i) => <li key={i} dangerouslySetInnerHTML={{__html: item.replace(/(Nơi đăng ký khai sinh:|Quê quán:|Nơi đăng ký thường trú:|Nơi ở hiện nay:|Dân tộc:|Tôn giáo:|Nghề nghiệp hiện nay:|Tình trạng sức khoẻ:)/g, '<span class="font-bold text-gray-900">$1</span>')}} />)}
+                            </ul>
+                          </div>
+                        </div>
+
+                        {/* Box 3: Quá trình công tác */}
+                        <div className="rounded-xl overflow-hidden border border-[#d92626]/20 bg-[#fff9e6] shadow-sm">
+                          <div className="bg-[#b81d1d] text-white p-2.5 px-4 font-bold text-[13px] flex items-center gap-2">
+                            <Briefcase className="w-4 h-4" /> QUÁ TRÌNH CÔNG TÁC
+                          </div>
+                          <div className="p-4 py-5 text-[13px] text-gray-800">
+                            <div className="relative border-l-2 border-yellow-500 ml-2 space-y-6">
+                              {c.qua_trinh_cong_tac.map((qt, i) => (
+                                <div key={i} className="relative pl-5">
+                                  <div className="absolute -left-[14px] top-0 bg-[#fff9e6] rounded-full p-0.5">
+                                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                                  </div>
+                                  <p className="font-bold text-[#b81d1d] mb-0.5">{qt.thoi_gian}</p>
+                                  <p className="text-gray-700">{qt.cong_viec}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                )) : (
+                  <div className="text-center py-12 bg-white/50 rounded-xl border border-dashed border-gray-300">
+                    <p className="text-gray-500 font-medium">Chưa có ứng cử viên nào ở cấp này.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 bg-white border-t border-gray-200 shrink-0">
+                <button onClick={closeCandidateList} className="w-full py-3 bg-white border border-red-200 text-[#b81d1d] rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition uppercase text-sm shadow-sm">
+                  <X className="w-5 h-5" /> Đóng danh sách
+                </button>
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar bg-gray-50 pb-20">
-              {selectedCandidate ? (
-                <div className="p-6 md:flex gap-8"><img src={selectedCandidate.anh} className="w-48 h-64 object-cover rounded-xl shadow-md border-4 border-white mx-auto md:mx-0" /><div className="flex-1 mt-6 md:mt-0"><h1 className="text-3xl font-bold text-[#b83332] mb-2">{selectedCandidate.ten}</h1><div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 mb-6 bg-white p-4 rounded-xl border border-gray-100"><p><span className="font-bold text-gray-900">Năm sinh:</span> {selectedCandidate.nam_sinh}</p><p><span className="font-bold text-gray-900">Quê quán:</span> {selectedCandidate.que_quan}</p><p><span className="font-bold text-gray-900">Trình độ:</span> {selectedCandidate.trinh_do}</p><p><span className="font-bold text-gray-900">Nghề nghiệp:</span> {selectedCandidate.nghe_nghiep}</p><p className="md:col-span-2"><span className="font-bold text-[#b83332]">Ứng cử tại:</span> {selectedCandidate.don_vi_bau_cu}</p></div><div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm"><h3 className="font-bold text-lg mb-4 text-gray-800 border-b pb-2">Tiểu sử tóm tắt</h3><p className="text-gray-600 leading-relaxed text-justify">{selectedCandidate.tieu_su}</p></div></div></div>
-              ) : viewMode === 'candidates' ? (
-                <div className="p-6"><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{stationCandidates.map(c => (<div key={c.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col"><div className="p-5 flex flex-col items-center"><img src={c.anh} className="w-24 h-24 object-cover rounded-full shadow-md border-2 border-red-100 mb-4" /><h4 className="font-bold text-lg text-gray-900 text-center">{c.ten}</h4><p className="text-sm text-gray-500 mb-2">SN: {c.nam_sinh}</p><p className="text-sm font-bold text-[#b83332] uppercase">{c.nghe_nghiep}</p></div><button onClick={() => setSelectedCandidate(c)} className="w-full py-3 bg-red-50 text-[#b83332] font-bold hover:bg-red-100 transition flex items-center justify-center gap-2 border-t border-red-100">XEM TIỂU SỬ <ChevronRight className="w-4 h-4"/></button></div>))}</div></div>
-              ) : (
+          ) : (
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-full max-h-[95vh] flex flex-col overflow-hidden relative border border-white/20 animate-in fade-in zoom-in-95 duration-300">
+              <div className="bg-[#b83332] text-white p-6 flex items-center gap-4 shrink-0 relative border-b-2 border-[#fbbf24]">
+                <div className={`w-14 h-14 bg-[#b83332] rounded-full border-2 border-[#fbbf24] flex items-center justify-center shrink-0 shadow-lg`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fbbf24" className="w-8 h-8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                </div>
+                <div className="flex-1 space-y-0.5 overflow-hidden">
+                  <div className="flex items-center gap-2"><span className="w-4 h-[1px] bg-[#fbbf24] shrink-0"></span><p className="text-[#fbbf24] text-xs font-bold uppercase tracking-wider truncate">{detailedStation.don_vi_bau_cu} ({detailedStation.phuong_xa_cu})</p><span className="w-4 h-[1px] bg-[#fbbf24] shrink-0"></span></div>
+                  <h2 className="text-xl font-bold leading-tight uppercase tracking-tight truncate">{detailedStation.ten_diem}</h2>
+                  <p className="text-sm font-medium text-white/90 uppercase truncate">Tại {detailedStation.dia_chi_moi}</p>
+                </div>
+                <button onClick={() => { setDetailedStation(null); setShowQR(false); }} className="p-1.5 bg-white/10 hover:bg-white/30 rounded-full transition ml-2"><X className="w-6 h-6" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto custom-scrollbar bg-gray-50 pb-20">
                 <div className="flex flex-col">
                   <div className="relative group bg-white border-b border-gray-200 shadow-sm"><div className="aspect-[16/8] md:aspect-[21/9] overflow-hidden"><img src={detailedStation.hinh_anh} className="w-full h-full object-cover" /></div><button className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center text-red-700 shadow-md opacity-0 group-hover:opacity-100 transition"><ChevronLeft className="w-6 h-6" /></button><button className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center text-red-700 shadow-md opacity-0 group-hover:opacity-100 transition"><ChevronRight className="w-6 h-6" /></button><div className="absolute bottom-4 left-4 flex gap-2"><div className="w-16 h-10 border-2 border-red-600 rounded overflow-hidden"><img src={detailedStation.hinh_anh} className="w-full h-full object-cover" /></div></div></div>
                   <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center"><Users className="w-6 h-6 text-red-700 mb-2" /><p className="text-sm font-bold text-gray-800 mb-2">Ứng cử viên</p><button onClick={() => setViewMode('candidates')} className="px-4 py-1.5 bg-red-50 text-[#b83332] rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition uppercase tracking-tighter">Xem danh sách ứng cử viên</button></div>
+                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center"><Users className="w-6 h-6 text-red-700 mb-2" /><p className="text-sm font-bold text-gray-800 mb-2">Ứng cử viên</p><button onClick={openCandidateList} className="px-4 py-1.5 bg-red-50 text-[#b83332] rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition uppercase tracking-tighter">Xem danh sách ứng cử viên</button></div>
                     <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center"><FileText className="w-6 h-6 text-red-700 mb-2" /><p className="text-sm font-bold text-gray-800 mb-2">Quy trình bỏ phiếu</p><button className="px-4 py-1.5 bg-red-50 text-[#b83332] rounded-full text-xs font-bold border border-red-100 hover:bg-red-100 transition uppercase tracking-tighter">Xem quy trình bỏ phiếu</button></div>
                     <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center"><Clock className="w-6 h-6 text-red-700 mb-2" /><p className="text-sm font-bold text-gray-800 mb-1">Thời gian mở cửa</p><p className="text-[#c28b1e] font-bold text-lg">7:00 - 19:00</p></div>
                   </div>
@@ -341,10 +502,10 @@ export default function App() {
                     {showQR && (<div className="mt-4 p-6 bg-white border border-gray-200 rounded-xl shadow-inner flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-500 ease-out"><div className="p-3 bg-white border border-gray-200 rounded-2xl shadow-lg mb-4"><img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(detailedStation.ten_diem)}`} alt="QR Code" className="w-40 h-40" /></div><p className="text-gray-500 text-sm mb-4">Quét mã để xem điểm bầu cử này</p><button className="flex items-center gap-2 px-6 py-2 bg-gray-100 rounded-full text-sm font-bold text-gray-700 border border-gray-300 hover:bg-gray-200 transition"><Download className="w-4 h-4" /> Tải mã QR</button></div>)}
                   </div>
                 </div>
-              )}
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-4 md:px-8 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20"><button onClick={() => { setDetailedStation(null); setShowQR(false); }} className="flex-1 py-3 bg-white border-2 border-[#b83332] text-[#b83332] rounded-xl font-bold hover:bg-red-50 transition flex items-center justify-center gap-2 uppercase tracking-wide"><X className="w-5 h-5" /> Đóng</button><button onClick={() => getDirections(detailedStation.lat, detailedStation.lng)} className="flex-1 py-3 bg-[#b83332] text-white rounded-xl font-bold hover:bg-[#991b1b] transition flex items-center justify-center gap-2 shadow-lg shadow-red-200 uppercase tracking-wide"><Navigation className="w-5 h-5" /> Chỉ đường</button></div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-4 md:px-8 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20"><button onClick={() => { setDetailedStation(null); setSelectedCandidate(null); setViewMode('detail'); setShowQR(false); }} className="flex-1 py-3 bg-white border-2 border-[#b83332] text-[#b83332] rounded-xl font-bold hover:bg-red-50 transition flex items-center justify-center gap-2 uppercase tracking-wide"><X className="w-5 h-5" /> Đóng</button><button onClick={() => getDirections(detailedStation.lat, detailedStation.lng)} className="flex-1 py-3 bg-[#b83332] text-white rounded-xl font-bold hover:bg-[#991b1b] transition flex items-center justify-center gap-2 shadow-lg shadow-red-200 uppercase tracking-wide"><Navigation className="w-5 h-5" /> Chỉ đường</button></div>
-          </div>
+          )}
         </div>
       )}
     </div>
