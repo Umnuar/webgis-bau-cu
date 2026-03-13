@@ -56,7 +56,7 @@ export default function App() {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [viewMode, setViewMode] = useState('detail'); 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
   
   const qrRef = useRef(null);
 
@@ -99,7 +99,6 @@ export default function App() {
     });
   }, [searchQuery, selectedWard, selectedUnit]);
 
-  // Bộ lọc Phường/Xã khả dụng dựa trên Đơn vị bầu cử đã chọn
   const availableWards = useMemo(() => {
     const wards = selectedUnit === 'all' 
       ? mockStations 
@@ -107,7 +106,6 @@ export default function App() {
     return [...new Set(wards.map(s => s.phuong_xa_cu))].sort();
   }, [selectedUnit]);
 
-  // Bộ lọc Đơn vị khả dụng dựa trên Phường/Xã đã chọn
   const availableUnits = useMemo(() => {
     const units = selectedWard === 'all' 
       ? mockStations 
@@ -225,7 +223,7 @@ export default function App() {
         .custom-scrollbar:hover::-webkit-scrollbar-thumb { background-color: #9ca3af; }
       `}</style>
       
-      <div className={`fixed md:relative w-full md:w-[400px] bg-[#f0ece9] flex flex-col h-[50vh] md:h-screen shadow-2xl z-[1000] border-r border-gray-300 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:-ml-[400px]'}`}>
+      <div className={`fixed top-0 left-0 md:relative w-full md:w-[400px] bg-[#f0ece9] flex flex-col h-[100dvh] md:h-screen shadow-2xl z-[1000] border-r border-gray-300 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:-ml-[400px]'}`}>
         <div className="bg-[#f8f9fa] p-4 flex items-center gap-3 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
           <button onClick={() => setIsSidebarOpen(false)} className="p-1 hover:bg-gray-200 rounded-full transition text-gray-500">
             <X className="w-5 h-5" />
