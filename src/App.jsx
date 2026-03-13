@@ -574,8 +574,6 @@ export default function App() {
           )}
         </div>
       )}
-      <Analytics />
-      <SpeedInsights />
     </div>
   );
 }
